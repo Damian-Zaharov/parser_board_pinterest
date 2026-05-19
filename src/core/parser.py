@@ -22,35 +22,6 @@ class PinterestBoardParser:
         self.driver = driver
         self.wait = WebDriverWait(driver, config.TIMEOUT)
 
-    # def login(self) -> bool:
-    #     """Выполняет авторизацию на Pinterest."""
-    #     logger.info("Переход на страницу авторизации Pinterest...")
-    #     self.driver.get("https://pinterest.com")
-    #
-    #     try:
-    #         # Ожидание и ввод Email
-    #         email_field = self.wait.until(EC.presence_of_element_located((By.ID, "email")))
-    #         email_field.clear()
-    #         email_field.send_keys(config.PINTEREST_EMAIL)
-    #
-    #         # Ожидание и ввод Пароля
-    #         password_field = self.driver.find_element(By.ID, "password")
-    #         password_field.clear()
-    #         password_field.send_keys(config.PINTEREST_PASSWORD)
-    #
-    #         # Клик по кнопке Войти (ищем по тегу button с типом submit)
-    #         login_button = self.driver.find_element(By.XPATH, "//button[@type='submit']")
-    #         login_button.click()
-    #
-    #         logger.info("Данные авторизации отправлены. Ожидание завершения входа...")
-    #         # Ждем появления элемента, который доступен только авторизованным юзерам (например, поисковая строка)
-    #         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[data-test-id="search-box-input"]')))
-    #         logger.info("Авторизация успешно пройдена!")
-    #         return True
-    #
-    #     except Exception as e:
-    #         logger.error(f"Не удалось авторизоваться: {e}")
-    #         return False
     def login(self) -> bool:
         """Выполняет стабильную авторизацию на Pinterest на правильном поддомене."""
         from urllib.parse import urlparse
@@ -58,7 +29,7 @@ class PinterestBoardParser:
         import random
 
         # Извлекаем базовый домен из ссылки на доску (например, https://pinterest.com)
-        # Это нужно, чтобы логиниться на том же поддомене, где лежит доска, избегая разлогина
+        # с ним будем логиниться на том же поддомене, где лежит доска, избегая разлогина
         try:
             parsed_url = urlparse(config.BOARD_URL)
             base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
@@ -88,14 +59,14 @@ class PinterestBoardParser:
 
             time.sleep(random.uniform(0.5, 1.0))
 
-            # 3. Отправка формы через клавишу ENTER (надежнее, чем клик по кнопке)
+            # 3. Отправка формы через клавишу ENTER (надежнее)
             logger.info("Отправка формы через нажатие Enter...")
             password_field.send_keys(Keys.ENTER)
 
             logger.info("Данные отправлены. Ожидание завершения входа (макс. 45 сек)...")
 
             # 4. Проверяем успешность входа по появлению главного элемента интерфейса.
-            # Таймаут увеличен: если появится капча, вы успеете нажать ее руками!
+            # Таймаут увеличен: если вдруг капча, итд
             smart_wait = WebDriverWait(self.driver, 45)
             smart_wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'input[data-test-id="search-box-input"]'))
@@ -106,76 +77,13 @@ class PinterestBoardParser:
 
         except Exception as e:
             logger.error(f"Не удалось авторизоваться: {e}")
-            # Сохраняем скриншот при падении — это стандарт разработки автотестов
+            # Сохраняем скриншот при падении
             screenshot_path = "auth_error.png"
             self.driver.save_screenshot(screenshot_path)
             logger.error(f"Скриншот страницы в момент ошибки сохранен в '{screenshot_path}'")
             return False
 
-    # def collect_pin_urls(self) -> Set[str]:
-    #     """Скроллит доску и собирает уникальные ссылки на пины с защитой от зависания загрузки."""
-    #     if not config.BOARD_URL:
-    #         raise ValueError("BOARD_URL не задан в конфигурации (.env)")
-    #
-    #     # logger.info(f"Переход к доске: {config.BOARD_URL}")
-    #     # self.driver.get(config.BOARD_URL)
-    #     logger.info(f"Синхронный переход к доске: {config.BOARD_URL}")
-    #     self.driver.execute_script(f"window.location.href = '{config.BOARD_URL}';")
-    #
-    #     # Даем странице доски начать загрузку
-    #     time.sleep(3)
-    #
-    #     try:
-    #         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-test-id="pin"]')))
-    #     except Exception:
-    #         logger.warning("Сетка пинов не обнаружилась сразу, пробуем начать скроллинг.")
-    #
-    #     pin_urls: Set[str] = set()
-    #     last_height = self.driver.execute_script("return document.body.scrollHeight")
-    #     no_change_count = 0
-    #     max_no_change_attempts = 8  # Middle-решение: даем Pinterest до 8 попыток (около 8 секунд) на подгрузку контента
-    #
-    #     logger.info(f"Начало сбора ссылок. Цель: {config.EXPECTED_PINS} шт.")
-    #
-    #     for iteration in range(config.MAX_SCROLL_ITER):
-    #         elements = self.driver.find_elements(By.CSS_SELECTOR, 'div[data-test-id="pin"] a')
-    #         for elem in elements:
-    #             href = elem.get_attribute("href")
-    #             if href and "/pin/" in href:
-    #                 clean_url = href.split('?')[0]
-    #                 pin_urls.add(clean_url)
-    #
-    #         current_count = len(pin_urls)
-    #         logger.info(f"Итерация {iteration + 1}: Собрано ссылок: {current_count}/{config.EXPECTED_PINS}")
-    #
-    #         if current_count >= config.EXPECTED_PINS:
-    #             logger.info(f"Достигнуто целевое количество пинов: {current_count}")
-    #             break
-    #
-    #         # Скроллим вниз
-    #         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    #         time.sleep(config.SCROLL_PAUSE)
-    #
-    #         # Проверяем высоту страницы
-    #         new_height = self.driver.execute_script("return document.body.scrollHeight")
-    #
-    #         if new_height == last_height:
-    #             no_change_count += 1
-    #             # Имитируем поведение человека: если страница зависла, скроллим чуть-чуть вверх и снова вниз
-    #             if no_change_count == 3:
-    #                 logger.info("Страница подзависла. Пробуем 'растолкать' скроллинг...")
-    #                 self.driver.execute_script("window.scrollBy(0, -500);")
-    #                 time.sleep(0.5)
-    #                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    #
-    #             if no_change_count >= max_no_change_attempts:
-    #                 logger.info(f"Достигнут реальный конец доски после {max_no_change_attempts} попыток ожидания.")
-    #                 break
-    #         else:
-    #             last_height = new_height
-    #             no_change_count = 0
-    #
-    #     return pin_urls
+
 
     def collect_pin_urls(self) -> Set[str]:
         """Скроллит доску и собирает уникальные ссылки на пины с защитой сессии."""
@@ -191,7 +99,7 @@ class PinterestBoardParser:
         self.driver.get(config.BOARD_URL)
         time.sleep(3)
 
-        # 3. Middle-проверка: проверяем, не выкинуло ли нас на страницу логина
+        # 3. Проверяем, не выкинуло ли нас на страницу логина
         if "login" in self.driver.current_url or not self.driver.find_elements(By.CSS_SELECTOR, '[data-test-id="pin"]'):
             logger.warning("Обнаружен сброс сессии (разлогин)! Принудительно внедряем куки...")
 
@@ -216,7 +124,7 @@ class PinterestBoardParser:
             logger.error(
                 "Защита Pinterest отклонила куки. Попробуйте отключить HEADLESS режим в .env, чтобы пройти проверку визуально.")
 
-        # --- Далее идет твой стабильный цикл скроллинга (оставляем без изменений) ---
+
         pin_urls: Set[str] = set()
         last_height = self.driver.execute_script("return document.body.scrollHeight")
         no_change_count = 0
@@ -301,7 +209,7 @@ class PinterestBoardParser:
                     metadata.image_url = img_src
                     metadata.status = "ready_to_download"
                     metadata.filename = f"{pin_id}.jpg"
-                    # ОБНОВЛЕННЫЙ ЛОГ: выводим прогресс в формате nn/xx
+                    # Выводим прогресс в формате nn/xx
                     logger.info(f"[{current_index}/{total_count}] Успешно найден URL картинки для пина {pin_id}")
                     return metadata
 

@@ -56,7 +56,7 @@ def main() -> None:
         # 6. Инициализируем загрузчик и передаем ему куки из Selenium
         downloader = ImageDownloader(driver)
 
-        # 7. Скачиваем картинки на диск
+        # 7. Скачиваем картинки
         downloader.download_images(pins_metadata)
 
         # 8. Сохраняем отчет со статусами в CSV

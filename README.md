@@ -1,4 +1,4 @@
-_# Pinterest Board Image Downloader (AQA / Python Portfolio Project)
+# Pinterest Board Image Downloader (AQA / Python Portfolio Project)
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Selenium](https://img.shields.io/badge/Selenium-4-43B02A?logo=selenium&logoColor=white)

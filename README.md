@@ -1,12 +1,12 @@
 _# Pinterest Board Image Downloader (AQA / Python Portfolio Project)
 
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Selenium](https://img.shields.io/badge/Selenium-4-43B02A?style=for-the-badge&logo=selenium&logoColor=white)
-![Requests](https://img.shields.io/badge/Requests-HTTP_Client-20232A?style=for-the-badge)
-![TQDM](https://img.shields.io/badge/TQDM-Progress_Bars-FFC107?style=for-the-badge)
-![dotenv](https://img.shields.io/badge/.env-python--dotenv-ECD53F?style=for-the-badge)
-![Architecture](https://img.shields.io/badge/Architecture-SOLID%20%26%20Clean-blue?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Selenium](https://img.shields.io/badge/Selenium-4-43B02A?logo=selenium&logoColor=white)
+![Requests](https://img.shields.io/badge/Requests-HTTP__Client-20232A?logo=python&logoColor=white)
+![TQDM](https://img.shields.io/badge/TQDM-Progress__Bars-FFC107?logo=python&logoColor=black)
+![dotenv](https://img.shields.io/badge/.env-python--dotenv-ECD53F?logo=probot&logoColor=black)
+![Architecture](https://img.shields.io/badge/Architecture-SOLID_%26_Clean-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 Скрипт логинится на пинтересте, притворяется пользователем (обход Anti-Bot) и скачивает в /downloads все оригинальные изображения с доски в максимальном разрешении
 
